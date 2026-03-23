@@ -10,22 +10,25 @@ router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-    return res.status(400).json({ message: "Username and password required" });
-  }
-
+  return res.status(400).json({
+    message: "All fields required",
+  });
+}
   try {
     const db = getDB();
 
-    const existingUser = await db.collection("users").findOne({ username });
+    const existingEmail = await db.collection("users").findOne({ email });
 
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
+if (existingEmail) {
+  return res.status(400).json({
+    message: "Email already exists",
+  });
+}
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.collection("users").insertOne({
       username,
+      email,
       password: hashedPassword,
     });
 
@@ -34,6 +37,8 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
 
 // LOGIN
 router.post("/login", async (req, res) => {
